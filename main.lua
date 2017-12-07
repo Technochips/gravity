@@ -39,6 +39,8 @@ function love.load(args)
 	
 	showVelocity = false
 	shownVelMul = 8
+	
+	scrollspeed = 10
 end
 
 function love.update(dt)
@@ -238,6 +240,8 @@ function love.draw()
 		if showVelocity then
 			text = text .. "Velocity is shown\n"
 		end
+		
+		text = text .. "Camera speed: " .. camspeed .. "\n"
 		love.graphics.setColor({255, 255, 255})
 		love.graphics.print(text, 5, 5)
 	end
@@ -281,5 +285,11 @@ function love.mousepressed(x, y, button, isTouch)
 			v[3] = 0
 			v[4] = 0
 		end
+	end
+end
+
+function love.wheelmoved(x,y)
+	if camspeed + y * scrollspeed >= 0 then
+		camspeed = camspeed + y * scrollspeed
 	end
 end
