@@ -2,7 +2,7 @@ function love.load(args)
 	JSON = require "lib.JSON"
 	
 	starImg = love.graphics.newImage("star.png")
-	stars = {} -- STAR = {x, y, velX, velY, nX, nY, mass, color}
+	stars = {} -- STAR = {x, y, velX, velY, mass, color, unaccelerable}
 	
 	pause = false
 	wall = true
@@ -78,26 +78,25 @@ function love.update(dt)
 					v[2] = v[2] - love.graphics.getHeight()
 				end
 			end
-			for l, w in pairs(stars) do
-				if k ~= l then
-					local r = math.sqrt((v[1] - w[1])^2 + (v[2] - w[2])^2)
-					local a = math.atan2(v[1] - w[1], v[2] - w[2])
-					if r ~= 0 then
-						local vx = math.sin(a) / r
-						local vy = math.cos(a) / r
-						
-						v[3] = v[3] - vx
-						v[4] = v[4] - vy
+			if not v[7] then
+				for l, w in pairs(stars) do
+					if k ~= l then
+						local r = math.sqrt((v[1] - w[1])^2 + (v[2] - w[2])^2)
+						local a = math.atan2(v[1] - w[1], v[2] - w[2])
+						if r ~= 0 then
+							local vx = math.sin(a) / r
+							local vy = math.cos(a) / r
+							
+							v[3] = v[3] - vx
+							v[4] = v[4] - vy
+						end
 					end
 				end
 			end
-			
-			v[5] = v[1] + v[3]
-			v[6] = v[2] + v[4]
 		end
 		for k, v in pairs(stars) do
-			v[1] = v[5]
-			v[2] = v[6]
+			v[1] = v[1] + v[3]
+			v[2] = v[2] + v[4]
 		end
 	end
 end
@@ -114,7 +113,7 @@ function generate()
 			local r = love.math.random()
 			
 			if r < n then
-				table.insert(stars, {x, y, 0, 0, 0, 0, 1, {love.math.random(224, 255), love.math.random(224, 255), love.math.random(224, 255)}})
+				table.insert(stars, {x, y, 0, 0, 1, {love.math.random(224, 255), love.math.random(224, 255), love.math.random(224, 255)}, false})
 			end
 			
 				y = y + 5
@@ -190,7 +189,7 @@ function love.draw()
 	end
 	
 	for k, v in pairs(stars) do
-		if starColor then love.graphics.setColor(v[8]) else love.graphics.setColor({255, 255, 255}) end
+		if starColor then love.graphics.setColor(v[6]) else love.graphics.setColor({255, 255, 255}) end
 		if starStyle == "image" then
 			love.graphics.draw(starImg, v[1] - (starImg:getWidth() / 2) - camX, v[2] - (starImg:getHeight() / 2) - camY)
 		elseif starStyle == "circle" then
@@ -276,7 +275,7 @@ end
 
 function love.mousepressed(x, y, button, isTouch)
 	if button == 1 then
-		table.insert(stars, {x + camX, y + camY, 0, 0, 0, 0, 1, {love.math.random(224, 255), love.math.random(224, 255), love.math.random(224, 255)}})
+		table.insert(stars, {x + camX, y + camY, 0, 0, 1, {love.math.random(224, 255), love.math.random(224, 255), love.math.random(224, 255)}, false})
 	elseif button == 3 then
 		for k, v in pairs(stars) do
 			v[3] = 0
