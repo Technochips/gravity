@@ -1,4 +1,6 @@
 function love.load(args)
+	JSON = require "lib.JSON"
+	
 	starImg = love.graphics.newImage("star.png")
 	stars = {} -- STAR = {x, y, velX, velY, nX, nY, mass, color}
 	
@@ -17,13 +19,17 @@ function love.load(args)
 	
 	argt = {}
 	
-	for k, v in pairs(args) do
-		argt[v] = true
-	end
-	
-	if argt["-g"] then	
-		generate()
-		pause = true
+	for i = 1, #args do
+		if args[i] == "-g" and (not argt["g-"]) then	
+			argt["-g"] = true
+			generate()
+			pause = true
+		end
+		if args[i] == "-l" and (not argt["-l"]) then	
+			argt["-t"] = true
+			loadUniverse(args[i + 1])
+			i = i + 1
+		end
 	end
 	
 	eraseBrushSize = 25
@@ -116,6 +122,28 @@ function generate()
 		x = x + 5
 	end
 	print("TOTAL OF " .. #stars .. " STARS CREATED")
+end
+
+function loadUniverse(file)
+	local contents, e = love.filesystem.read(file)
+	if contents == nil then
+		print("Something went wrong!\n" .. e)
+	else
+		local decoded = JSON:decode(contents)
+		stars = {}
+		if decoded.properties.pause ~= nil then pause = decoded.properties.pause end
+		if decoded.properties.wall ~= nil then wall = decoded.properties.wall end
+		if decoded.properties.camX ~= nil then camX = decoded.properties.camX end
+		if decoded.properties.camY ~= nil then camY = decoded.properties.camY end
+		if decoded.properties.info ~= nil then info = decoded.properties.info end
+		if decoded.properties.starColor ~= nil then starColor = decoded.properties.starColor end
+		if decoded.properties.starStyle ~= nil then starStyle = decoded.properties.starStyle end
+		if decoded.properties.showVelocity ~= nil then showVelocity = decoded.properties.showVelocity end
+		
+		for k, v in pairs(decoded.stars) do
+			table.insert(stars, v)
+		end
+	end
 end
 
 function love.draw()
