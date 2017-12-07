@@ -125,24 +125,61 @@ function generate()
 end
 
 function loadUniverse(file)
-	local contents, e = love.filesystem.read(file)
-	if contents == nil then
-		print("Something went wrong!\n" .. e)
-	else
-		local decoded = JSON:decode(contents)
-		stars = {}
-		if decoded.properties.pause ~= nil then pause = decoded.properties.pause end
-		if decoded.properties.wall ~= nil then wall = decoded.properties.wall end
-		if decoded.properties.camX ~= nil then camX = decoded.properties.camX end
-		if decoded.properties.camY ~= nil then camY = decoded.properties.camY end
-		if decoded.properties.info ~= nil then info = decoded.properties.info end
-		if decoded.properties.starColor ~= nil then starColor = decoded.properties.starColor end
-		if decoded.properties.starStyle ~= nil then starStyle = decoded.properties.starStyle end
-		if decoded.properties.showVelocity ~= nil then showVelocity = decoded.properties.showVelocity end
-		
-		for k, v in pairs(decoded.stars) do
-			table.insert(stars, v)
+	local contents, e = nil
+	if not love.filesystem.exists(file) then
+		file = "saves/" .. file
+		if not love.filesystem.exists(file) then
+			e = "File doesn't exists"
 		end
+	end
+	if e == nil then
+		local contents, e = love.filesystem.read(file)
+		if contents == nil then
+			print("Something went wrong while loading!\n" .. e)
+		else
+			local decoded = JSON:decode(contents)
+			stars = {}
+			if decoded.properties.pause ~= nil then pause = decoded.properties.pause end
+			if decoded.properties.wall ~= nil then wall = decoded.properties.wall end
+			if decoded.properties.camX ~= nil then camX = decoded.properties.camX end
+			if decoded.properties.camY ~= nil then camY = decoded.properties.camY end
+			if decoded.properties.info ~= nil then info = decoded.properties.info end
+			if decoded.properties.starColor ~= nil then starColor = decoded.properties.starColor end
+			if decoded.properties.starStyle ~= nil then starStyle = decoded.properties.starStyle end
+			if decoded.properties.showVelocity ~= nil then showVelocity = decoded.properties.showVelocity end
+			
+			stars = decoded.stars
+		end
+	end
+end
+
+function saveUniverse()
+	--"saves/" .. os.time
+	local decoded = {}
+	decoded.stars = stars
+	decoded.properties = {}
+	decoded.properties.pause = pause
+	decoded.properties.wall = wall
+	decoded.properties.camX = camX
+	decoded.properties.camY = camY
+	decoded.properties.info = info
+	decoded.properties.starColor = starColor
+	decoded.properties.starStyle = starStyle
+	decoded.properties.showVelocity = showVelocity
+	
+	local encoded = JSON:encode(decoded)
+	
+	local filePath = "saves/" .. os.time()
+	
+	if not love.filesystem.isDirectory("saves") then
+		love.filesystem.createDirectory("saves")
+	end
+	
+	success, e = love.filesystem.write(filePath, encoded)
+	if not success then
+		print("Something went wrong while saving!\n" .. e)
+	else
+		print("Saved in " .. filePath)
 	end
 end
 
@@ -232,6 +269,8 @@ function love.keypressed(key, scancode, isrepeat)
 		end
 	elseif key == "v" then
 		showVelocity = not showVelocity
+	elseif key == "o" then
+		saveUniverse()
 	end
 end
 

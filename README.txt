@@ -12,3 +12,20 @@ How to use this fancy star gravity simulator:
 -C to enable/disable the star's random color
 -S to change the star's style between sprite, circle and point
 -V to show each star's velocity
+-O to save your universe
+
+Application parameters:
+What's an applicaton parameter? You can type them by opening a terminal/cmd, launching the game by typing "love gravity.love", and then type these extra piece of text
+
+-"-g" to generate a new universe with stars at startup
+-"-l <SAVE FILE>" to load a save file
+
+Where are my saved universe located?
+
+It's simple, here:
+
+Windows: %appdata%\LOVE\gravity\saves
+Mac: /Users/<YOU>/Library/Application Support/LOVE/gravity/saves
+Linux: ~/.local/share/love/gravity/saves
+
+The higher the number of the file is, the more recent it is.
