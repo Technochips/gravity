@@ -4,6 +4,8 @@ function love.load(args)
 	starImg = love.graphics.newImage("star.png")
 	stars = {} -- STAR = {x, y, velX, velY, mass, color, unaccelerable}
 	
+	starsV = {} -- STAR VISUALISATION = {velX, velY, accelX, accelY}
+	
 	pause = false
 	wall = true
 	
@@ -39,6 +41,8 @@ function love.load(args)
 	
 	showVelocity = false
 	shownVelMul = 8
+	showAcceleration = false
+	shownAccMul = 32
 	
 	scrollspeed = 10
 end
@@ -67,6 +71,7 @@ function love.update(dt)
 	end
 	if not pause then
 		for k, v in pairs(stars) do
+			starsV[k] = {0, 0, 0, 0}
 			if wall then
 				if v[1] < 0 then
 					v[1] = v[1] + love.graphics.getWidth()
@@ -91,6 +96,9 @@ function love.update(dt)
 							
 							v[3] = v[3] - vx
 							v[4] = v[4] - vy
+							
+							starsV[k][3] = starsV[k][3] + vx
+							starsV[k][4] = starsV[k][4] + vy
 						end
 					end
 				end
@@ -203,6 +211,13 @@ function love.draw()
 		if showVelocity then
 			love.graphics.line(v[1] - camX, v[2] - camY, (v[1] - camX) + (v[3] * shownVelMul), (v[2] - camY) + (v[4] * shownVelMul))
 		end
+		if showAcceleration then
+			if starsV[k] then
+				if starsV[k][3] and starsV[k][4] then
+					love.graphics.line(v[1] - camX, v[2] - camY, (v[1] - camX) - (starsV[k][3] * shownAccMul), (v[2] - camY) - (starsV[k][4] * shownAccMul))
+				end
+			end
+		end
 	end
 	
 	if info then
@@ -240,6 +255,9 @@ function love.draw()
 		if showVelocity then
 			text = text .. "Velocity is shown\n"
 		end
+		if showAcceleration then
+			text = text .. "Acceleration is shown\n"
+		end
 		
 		text = text .. "Camera speed: " .. camspeed .. "\n"
 		love.graphics.setColor({255, 255, 255})
@@ -274,6 +292,8 @@ function love.keypressed(key, scancode, isrepeat)
 		showVelocity = not showVelocity
 	elseif key == "o" then
 		saveUniverse()
+	elseif key == "a" then
+		showAcceleration = not showAcceleration
 	end
 end
 
