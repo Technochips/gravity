@@ -222,7 +222,10 @@ function love.draw()
 			end
 		end
 	end
-	
+	if wall then
+		love.graphics.setColor({255, 255, 255})
+		love.graphics.rectangle("line", -camX, -camY, love.graphics.getWidth(), love.graphics.getHeight())
+	end
 	if info then
 		local text = #stars .. " stars\n"
 		text = text .. love.timer.getFPS() .. " FPS\n"
