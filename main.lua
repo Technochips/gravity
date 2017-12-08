@@ -156,6 +156,8 @@ function loadUniverse(file)
 			if decoded.properties.starColor ~= nil then starColor = decoded.properties.starColor end
 			if decoded.properties.starStyle ~= nil then starStyle = decoded.properties.starStyle end
 			if decoded.properties.showVelocity ~= nil then showVelocity = decoded.properties.showVelocity end
+			if decoded.properties.showAcceleration ~= nil then showAcceleration = decoded.properties.showAcceleration end
+			if decoded.properties.camspeed ~= nil then camspeed = decoded.properties.camspeed end
 			
 			stars = decoded.stars
 		end
@@ -175,6 +177,8 @@ function saveUniverse()
 	decoded.properties.starColor = starColor
 	decoded.properties.starStyle = starStyle
 	decoded.properties.showVelocity = showVelocity
+	decoded.properties.showAcceleration = showAcceleration
+	decoded.properties.camspeed = camspeed
 	
 	local encoded = JSON:encode(decoded)
 	

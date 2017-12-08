@@ -8,7 +8,9 @@
 		"wall": false,
 		"starColor": true,
 		"starStyle": "image",
-		"showVelocity": false
+		"showVelocity": false,
+		"showAcceleration": false,
+		"camspeed": 50
 	},
 	"stars":
 	[
