@@ -91,8 +91,8 @@ function love.update(dt)
 						local r = math.sqrt((v[1] - w[1])^2 + (v[2] - w[2])^2)
 						local a = math.atan2(v[1] - w[1], v[2] - w[2])
 						if r ~= 0 then
-							local vx = math.sin(a) / r
-							local vy = math.cos(a) / r
+							local vx = math.sin(a) / r / v[5] * w[5]
+							local vy = math.cos(a) / r / v[5] * w[5]
 							
 							v[3] = v[3] - vx
 							v[4] = v[4] - vy
@@ -123,7 +123,7 @@ function generate()
 			local r = love.math.random()
 			
 			if r < n then
-				table.insert(stars, {x, y, 0, 0, 1, {love.math.random(224, 255), love.math.random(224, 255), love.math.random(224, 255)}, false})
+				table.insert(stars, {x, y, 0, 0, map_range(love.math.random(), 0, 1, 0.25, 10), {love.math.random(224, 255), love.math.random(224, 255), love.math.random(224, 255)}, false})
 			end
 			
 				y = y + 5
@@ -207,7 +207,6 @@ function love.draw()
 		elseif starStyle == "point" then
 			love.graphics.points(v[1] - camX, v[2] - camY)
 		end
-		
 		if showVelocity then
 			love.graphics.line(v[1] - camX, v[2] - camY, (v[1] - camX) + (v[3] * shownVelMul), (v[2] - camY) + (v[4] * shownVelMul))
 		end
@@ -299,7 +298,8 @@ end
 
 function love.mousepressed(x, y, button, isTouch)
 	if button == 1 then
-		table.insert(stars, {x + camX, y + camY, 0, 0, 1, {love.math.random(224, 255), love.math.random(224, 255), love.math.random(224, 255)}, false})
+		--table.insert(stars, {x + camX, y + camY, 0, 0, 1, {love.math.random(224, 255), love.math.random(224, 255), love.math.random(224, 255)}, false})
+		table.insert(stars, {x + camX, y + camY, 0, 0, map_range(love.math.random(), 0, 1, 0.25, 10), {love.math.random(224, 255), love.math.random(224, 255), love.math.random(224, 255)}, false})
 	elseif button == 3 then
 		for k, v in pairs(stars) do
 			v[3] = 0
@@ -312,4 +312,8 @@ function love.wheelmoved(x,y)
 	if camspeed + y * scrollspeed >= 0 then
 		camspeed = camspeed + y * scrollspeed
 	end
+end
+
+function map_range(value, low1, high1, low2, high2)
+	return low2 + (high2 - low2) * (value - low1) / (high1 - low1)
 end
