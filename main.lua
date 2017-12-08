@@ -2,6 +2,8 @@ function love.load(args)
 	JSON = require "lib.JSON"
 	
 	starImg = love.graphics.newImage("star.png")
+	redstarImg = love.graphics.newImage("redstar.png")
+	rgiantstarImg = love.graphics.newImage("rgiantstar.png")
 	stars = {} -- STAR = {x, y, velX, velY, mass, color, unaccelerable}
 	
 	starsV = {} -- STAR VISUALISATION = {velX, velY, accelX, accelY}
@@ -11,7 +13,6 @@ function love.load(args)
 	
 	info = false
 	
-	starColor = true
 	
 	--G = 6.674 * 10^-11 * 1^3 * 1^-1 * 1^-2
 	
@@ -195,17 +196,35 @@ function saveUniverse()
 		print("Saved in " .. filePath)
 	end
 end
-
+function love.mousepressed(x, y, button, isTouch)
+	if button == 1 then
+		--table.insert(stars, {x + camX, y + camY, 0, 0, 1, {love.math.random(224, 255), love.math.random(224, 255), love.math.random(224, 255)}, false})
+		table.insert(stars, {x + camX, y + camY, 0, 0, map_range(love.math.random(), 0, 1, 0.25, 10), {love.math.random(224, 255), love.math.random(224, 255), love.math.random(224, 255)}, false})
+	elseif button == 3 then
+		for k, v in pairs(stars) do
+			v[3] = 0
+			v[4] = 0
+		end
+	end
+end
 function love.draw()
 	if love.mouse.isDown(2) then
 		love.graphics.setColor({255, 255, 255})
 		love.graphics.circle("line", love.mouse.getX(), love.mouse.getY(), eraseBrushSize)
 	end
-	
 	for k, v in pairs(stars) do
-		if starColor then love.graphics.setColor(v[6]) else love.graphics.setColor({255, 255, 255}) end
 		if starStyle == "image" then
-			love.graphics.draw(starImg, v[1] - (starImg:getWidth() / 2) - camX, v[2] - (starImg:getHeight() / 2) - camY)
+			if v[5] < 10 then
+				if v[5] > 5 then
+					love.graphics.draw(rgiantstarImg, v[1] - (rgiantstarImg:getWidth() / 2) - camX, v[2] - (rgiantstarImg:getHeight() / 2) - camY)
+				elseif v[5] > 1 then
+					if v[5] < 5 then
+						love.graphics.draw(starImg, v[1] - (starImg:getWidth() / 2) - camX, v[2] - (starImg:getHeight() / 2) - camY)
+					end
+				elseif v[5] < 1 then
+					love.graphics.draw(redstarImg, v[1] - (redstarImg:getWidth() / 2) - camX, v[2] - (redstarImg:getHeight() / 2) - camY)
+				end
+			end
 		elseif starStyle == "circle" then
 			love.graphics.circle("fill", v[1] - camX, v[2] - camY, circleSize)
 		elseif starStyle == "point" then
@@ -240,11 +259,7 @@ function love.draw()
 		end
 		
 		
-		if starColor then
-			text = text .. "Stars are colored\n"
-		else
-			text = text .. "Stars are all the same\n"
-		end
+
 		
 		if starStyle == "image" then
 			text = text .. "Stars are images\n"
@@ -284,8 +299,7 @@ function love.keypressed(key, scancode, isrepeat)
 		stars = {}
 	elseif key == "i" then
 		info = not info
-	elseif key == "c" then
-		starColor = not starColor
+
 	elseif key == "s" then
 		if starStyle == "image" then starStyle = "circle"
 		elseif starStyle == "circle" then starStyle = "point"
@@ -300,17 +314,7 @@ function love.keypressed(key, scancode, isrepeat)
 	end
 end
 
-function love.mousepressed(x, y, button, isTouch)
-	if button == 1 then
-		--table.insert(stars, {x + camX, y + camY, 0, 0, 1, {love.math.random(224, 255), love.math.random(224, 255), love.math.random(224, 255)}, false})
-		table.insert(stars, {x + camX, y + camY, 0, 0, map_range(love.math.random(), 0, 1, 0.25, 10), {love.math.random(224, 255), love.math.random(224, 255), love.math.random(224, 255)}, false})
-	elseif button == 3 then
-		for k, v in pairs(stars) do
-			v[3] = 0
-			v[4] = 0
-		end
-	end
-end
+
 
 function love.wheelmoved(x,y)
 	if camspeed + y * scrollspeed >= 0 then
