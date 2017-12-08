@@ -39,6 +39,8 @@ function love.load(args)
 	
 	starStyle = "image"
 	
+	wallMode = "wormhole"
+	
 	showVelocity = false
 	shownVelMul = 8
 	showAcceleration = false
@@ -73,16 +75,26 @@ function love.update(dt)
 		for k, v in pairs(stars) do
 			starsV[k] = {0, 0, 0, 0}
 			if wall then
-				if v[1] < 0 then
-					v[1] = v[1] + love.graphics.getWidth()
-				elseif v[1] > love.graphics.getWidth() then
-					v[1] = v[1] - love.graphics.getWidth()
-				end
-				
-				if v[2] < 0 then
-					v[2] = v[2] + love.graphics.getHeight()
-				elseif v[2] > love.graphics.getHeight() then
-					v[2] = v[2] - love.graphics.getHeight()
+				if wallMode == "wormhole" then
+					if v[1] < 0 then
+						v[1] = v[1] + love.graphics.getWidth()
+					elseif v[1] > love.graphics.getWidth() then
+						v[1] = v[1] - love.graphics.getWidth()
+					end
+					
+					if v[2] < 0 then
+						v[2] = v[2] + love.graphics.getHeight()
+					elseif v[2] > love.graphics.getHeight() then
+						v[2] = v[2] - love.graphics.getHeight()
+					end
+				elseif wallMode == "bounce" then
+					if v[1] < 0 or v[1] > love.graphics.getWidth() then
+						v[3] = -v[3]
+					end
+					
+					if v[2] < 0 or v[2] > love.graphics.getHeight() then
+						v[4] = -v[4]
+					end
 				end
 			end
 			if not v[7] then
@@ -238,6 +250,11 @@ function love.draw()
 		
 		if wall then
 			text = text .. "Wall\n"
+			if wallMode == "wormhole" then
+				text = text .. "Walls teleports stars\n"
+			elseif wallMode == "bounce" then
+				text = text .. "Stars bounces on walls\n"
+			end
 		else
 			text = text .. "No wall\n"
 		end
@@ -292,14 +309,16 @@ function love.keypressed(key, scancode, isrepeat)
 	elseif key == "s" then
 		if starStyle == "image" then starStyle = "circle"
 		elseif starStyle == "circle" then starStyle = "point"
-		elseif starStyle == "point" then starStyle = "image"
-		end
+		else starStyle = "image" end
 	elseif key == "v" then
 		showVelocity = not showVelocity
 	elseif key == "o" then
 		saveUniverse()
 	elseif key == "a" then
 		showAcceleration = not showAcceleration
+	elseif key == "m" then
+		if wallMode == "wormhole" then wallMode = "bounce"
+		else wallMode = "wormhole" end
 	end
 end
 
