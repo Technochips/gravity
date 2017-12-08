@@ -10,7 +10,7 @@ How to use this fancy star gravity simulator:
 -Space to pause
 -I to show universe info, fps etc...
 -C to enable/disable the star's random color
--S to change the star's style between sprite, circle and point
+-S to change the star's style between newer images, classic images, circle and point
 -V to show each star's velocity
 -A to show each star's acceleration
 -O to save your universe
