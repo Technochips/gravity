@@ -3,6 +3,7 @@ function love.load(args)
 	
 	starImg = love.graphics.newImage("star.png")
 	redstarImg = love.graphics.newImage("redstar.png")
+	classicstarImg = love.graphics.newImage("classicstar.png")
 	rgiantstarImg = love.graphics.newImage("rgiantstar.png")
 	stars = {} -- STAR = {x, y, velX, velY, mass, color, unaccelerable}
 	
@@ -229,6 +230,8 @@ function love.draw()
 			love.graphics.circle("fill", v[1] - camX, v[2] - camY, circleSize)
 		elseif starStyle == "point" then
 			love.graphics.points(v[1] - camX, v[2] - camY)
+		elseif starStyle == "classic" then
+			love.graphics.draw(classicstarImg, v[1] - (classicstarImg:getWidth() / 2) - camX, v[2] - (classicstarImg:getHeight() / 2) - camY)
 		end
 		if showVelocity then
 			love.graphics.line(v[1] - camX, v[2] - camY, (v[1] - camX) + (v[3] * shownVelMul), (v[2] - camY) + (v[4] * shownVelMul))
@@ -262,11 +265,13 @@ function love.draw()
 
 		
 		if starStyle == "image" then
-			text = text .. "Stars are images\n"
+			text = text .. "Stars have newer images\n"
 		elseif starStyle == "circle" then
 			text = text .. "Stars are circles\n"
 		elseif starStyle == "point" then
 			text = text .. "Stars are points\n"
+		elseif starStyle == "classic" then
+			text = text .. "Stars have classic images\n"
 		end
 		
 		
@@ -303,7 +308,8 @@ function love.keypressed(key, scancode, isrepeat)
 	elseif key == "s" then
 		if starStyle == "image" then starStyle = "circle"
 		elseif starStyle == "circle" then starStyle = "point"
-		elseif starStyle == "point" then starStyle = "image"
+		elseif starStyle == "point" then starStyle = "classic"
+		elseif starStyle == "classic" then starStyle = "image"
 		end
 	elseif key == "v" then
 		showVelocity = not showVelocity
