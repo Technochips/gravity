@@ -1,6 +1,5 @@
 function love.load(args)
 	JSON = require "lib.JSON"
-	
 	starImg = love.graphics.newImage("star.png")
 	redstarImg = love.graphics.newImage("redstar.png")
 	classicstarImg = love.graphics.newImage("classicstar.png")
@@ -40,7 +39,7 @@ function love.load(args)
 	circleSize = 5
 	
 	starStyle = "image"
-	
+	wallMode = "wormhole"
 	showVelocity = false
 	shownVelMul = 8
 	showAcceleration = false
@@ -75,16 +74,26 @@ function love.update(dt)
 		for k, v in pairs(stars) do
 			starsV[k] = {0, 0, 0, 0}
 			if wall then
-				if v[1] < 0 then
-					v[1] = v[1] + love.graphics.getWidth()
-				elseif v[1] > love.graphics.getWidth() then
-					v[1] = v[1] - love.graphics.getWidth()
-				end
-				
-				if v[2] < 0 then
-					v[2] = v[2] + love.graphics.getHeight()
-				elseif v[2] > love.graphics.getHeight() then
-					v[2] = v[2] - love.graphics.getHeight()
+				if wallMode == "wormhole" then
+					if v[1] < 0 then
+						v[1] = v[1] + love.graphics.getWidth()
+					elseif v[1] > love.graphics.getWidth() then
+						v[1] = v[1] - love.graphics.getWidth()
+					end
+					
+					if v[2] < 0 then
+						v[2] = v[2] + love.graphics.getHeight()
+					elseif v[2] > love.graphics.getHeight() then
+						v[2] = v[2] - love.graphics.getHeight()
+					end
+				elseif wallMode == "bounce" then
+					if v[1] < 0 or v[1] > love.graphics.getWidth() then
+						v[3] = -v[3]
+					end
+					
+					if v[2] < 0 or v[2] > love.graphics.getHeight() then
+						v[4] = -v[4]
+					end
 				end
 			end
 			if not v[7] then
@@ -244,7 +253,10 @@ function love.draw()
 			end
 		end
 	end
-	
+	if wall then
+		love.graphics.setColor({255, 255, 255})
+		love.graphics.rectangle("line", -camX, -camY, love.graphics.getWidth(), love.graphics.getHeight())
+	end	
 	if info then
 		local text = #stars .. " stars\n"
 		text = text .. love.timer.getFPS() .. " FPS\n"
@@ -257,6 +269,11 @@ function love.draw()
 		
 		if wall then
 			text = text .. "Wall\n"
+			if wallMode == "wormhole" then
+				text = text .. "Walls teleports stars\n"
+			elseif wallMode == "bounce" then
+				text = text .. "Stars bounces on walls\n"
+			end
 		else
 			text = text .. "No wall\n"
 		end
@@ -304,7 +321,9 @@ function love.keypressed(key, scancode, isrepeat)
 		stars = {}
 	elseif key == "i" then
 		info = not info
-
+	elseif key == "m" then
+		if wallMode == "wormhole" then wallMode = "bounce"
+		else wallMode = "wormhole" end
 	elseif key == "s" then
 		if starStyle == "image" then starStyle = "circle"
 		elseif starStyle == "circle" then starStyle = "point"
