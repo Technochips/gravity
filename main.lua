@@ -47,6 +47,9 @@ function love.load(args)
 	shownAccMul = 32
 	
 	scrollspeed = 10
+	
+	GM = 1
+	GMscrollspeed = 2
 end
 
 function love.update(dt)
@@ -102,9 +105,9 @@ function love.update(dt)
 					if k ~= l then
 						local r = math.sqrt((v[1] - w[1])^2 + (v[2] - w[2])^2)
 						local a = math.atan2(v[1] - w[1], v[2] - w[2])
-						if r ~= 0 then
-							local vx = math.sin(a) / w[5] / r
-							local vy = math.cos(a) / w[5] / r
+						if r > 1 then
+							local vx = math.sin(a) / w[5] * GM / r
+							local vy = math.cos(a) / w[5] * GM / r
 							
 							v[3] = v[3] - vx
 							v[4] = v[4] - vy
@@ -283,6 +286,7 @@ function love.draw()
 		end
 		
 		text = text .. "Camera speed: " .. camspeed .. "\n"
+		text = text .. "Gravity multiplier: " .. GM .. "\n"
 		love.graphics.setColor({255, 255, 255})
 		love.graphics.print(text, 5, 5)
 	end
@@ -319,6 +323,10 @@ function love.keypressed(key, scancode, isrepeat)
 	elseif key == "m" then
 		if wallMode == "wormhole" then wallMode = "bounce"
 		else wallMode = "wormhole" end
+	elseif key == "pageup" then
+		GM = GM * GMscrollspeed
+	elseif key == "pagedown" then
+		GM = GM / GMscrollspeed
 	end
 end
 
