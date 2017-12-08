@@ -93,8 +93,8 @@ function love.update(dt)
 						local r = math.sqrt((v[1] - w[1])^2 + (v[2] - w[2])^2)
 						local a = math.atan2(v[1] - w[1], v[2] - w[2])
 						if r ~= 0 then
-							local vx = math.sin(a) / r / v[5] * w[5]
-							local vy = math.cos(a) / r / v[5] * w[5]
+							local vx = math.sin(a) / r / w[5]
+							local vy = math.cos(a) / r / w[5]
 							
 							v[3] = v[3] - vx
 							v[4] = v[4] - vy
