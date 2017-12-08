@@ -98,6 +98,22 @@ function love.update(dt)
 					if v[2] < 0 or v[2] > love.graphics.getHeight() then
 						v[4] = -v[4]
 					end
+				elseif wallMode == "stop" then
+					if v[1] < 0 then
+						v[1] = 0
+						v[3] = 0
+					elseif v[1] > love.graphics.getWidth() then
+						v[1] = love.graphics.getWidth()
+						v[3] = 0
+					end
+					
+					if v[2] < 0 then
+						v[2] = 0
+						v[4] = 0
+					elseif v[2] > love.graphics.getHeight() then
+						v[2] = love.graphics.getHeight()
+						v[4] = 0
+					end
 				end
 			end
 			if not v[7] then
@@ -257,6 +273,8 @@ function love.draw()
 				text = text .. "Walls teleports stars\n"
 			elseif wallMode == "bounce" then
 				text = text .. "Stars bounces on walls\n"
+			elseif wallMode == "stop" then
+				text = text .. "Stars stops on walls\n"
 			end
 		else
 			text = text .. "No wall\n"
@@ -322,6 +340,7 @@ function love.keypressed(key, scancode, isrepeat)
 		showAcceleration = not showAcceleration
 	elseif key == "m" then
 		if wallMode == "wormhole" then wallMode = "bounce"
+		elseif wallMode == "bounce" then wallMode = "stop"
 		else wallMode = "wormhole" end
 	elseif key == "pageup" then
 		GM = GM * GMscrollspeed

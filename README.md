@@ -6,6 +6,7 @@
 * Middle click to reset each star's velocity
 * G to generate a new universe with stars
 * W to enable/disable the walls that is on your screen's border
+* M to change the wall's mode of what would happen if a star hits it
 * N to empty the universe
 * Space to pause
 * I to show universe info, fps etc...
