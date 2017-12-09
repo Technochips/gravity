@@ -49,6 +49,9 @@ function love.load(args)
 	scrollspeed = 10
 	
 	focus = nil
+	starInfo = nil
+	
+	starInfoCircle = 25
 	
 	GM = 1
 	GMscrollspeed = 2
@@ -266,6 +269,21 @@ function love.draw()
 		love.graphics.setColor({255, 255, 255})
 		love.graphics.rectangle("line", -camX, -camY, love.graphics.getWidth(), love.graphics.getHeight())
 	end
+	if starInfo ~= nil then
+		if stars[starInfo] ~= nil then
+			local starInfoText = ""
+			starInfoText = starInfoText .. "X: " .. stars[starInfo][1] .. "\n"
+			starInfoText = starInfoText .. "Y: " .. stars[starInfo][2] .. "\n"
+			--starInfoText = starInfoText .. "Horizontal velocity: " .. stars[starInfo][3] .. "\n"
+			--starInfoText = starInfoText .. "Vertical velocity: " .. stars[starInfo][4] .. "\n"
+			starInfoText = starInfoText .. "Mass: " .. stars[starInfo][5] .. "\n"
+			if stars[starInfo][7] then tarInfoText = starInfoText .. "Unaccelerable\n" end
+			
+			love.graphics.setColor(255, 255, 255)
+			love.graphics.circle("line", stars[starInfo][1] - camX, stars[starInfo][2] - camY, starInfoCircle)
+			love.graphics.print(starInfoText, stars[starInfo][1] - camX + starInfoCircle, stars[starInfo][2] - camY + starInfoCircle)
+		end
+	end
 	if info then
 		local text = #stars .. " stars\n"
 		text = text .. love.timer.getFPS() .. " FPS\n"
@@ -332,6 +350,8 @@ function love.keypressed(key, scancode, isrepeat)
 	elseif key == "n" then
 		camX = 0
 		camY = 0
+		starInfo = nil
+		focus = nil
 		stars = {}
 	elseif key == "i" then
 		info = not info
