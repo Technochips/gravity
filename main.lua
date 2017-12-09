@@ -48,6 +48,8 @@ function love.load(args)
 	
 	scrollspeed = 10
 	
+	focus = nil
+	
 	GM = 1
 	GMscrollspeed = 2
 end
@@ -62,17 +64,24 @@ function love.update(dt)
 			end
 		end
 	end
-	if love.keyboard.isScancodeDown("right") then
-		camX = camX + camspeed
-	end
-	if love.keyboard.isScancodeDown("down") then
-		camY = camY + camspeed
-	end
-	if love.keyboard.isScancodeDown("left") then
-		camX = camX - camspeed
-	end
-	if love.keyboard.isScancodeDown("up") then
-		camY = camY - camspeed
+	if focus == nil then
+		if love.keyboard.isScancodeDown("right") then
+			camX = camX + camspeed
+		end
+		if love.keyboard.isScancodeDown("down") then
+			camY = camY + camspeed
+		end
+		if love.keyboard.isScancodeDown("left") then
+			camX = camX - camspeed
+		end
+		if love.keyboard.isScancodeDown("up") then
+			camY = camY - camspeed
+		end
+	else
+		if stars[focus] ~= nil then
+			camX = stars[focus][1] - (love.graphics.getWidth() / 2)
+			camY = stars[focus][2] - (love.graphics.getHeight() / 2)
+		end
 	end
 	if not pause then
 		for k, v in pairs(stars) do
