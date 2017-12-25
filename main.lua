@@ -1,6 +1,6 @@
 function love.load(args)
 	JSON = require "lib.JSON"
-	
+
 	starImg = love.graphics.newImage("star.png")
 	stars = {} -- STAR = {x, y, velX, velY, mass, color, unaccelerable}
 	
@@ -239,35 +239,32 @@ function saveUniverse()
 	end
 end
 
-function love.draw()
-	if love.mouse.isDown(2) then
-		love.graphics.setColor({255, 255, 255})
-		love.graphics.circle("line", love.mouse.getX(), love.mouse.getY(), eraseBrushSize)
-	end
-	
+function drawUniverse(x, y)
+	love.graphics.push()
+	love.graphics.translate(-x,-y)
 	for k, v in pairs(stars) do
 		if starColor then love.graphics.setColor(v[6]) else love.graphics.setColor({255, 255, 255}) end
 		if starStyle == "image" then
-			love.graphics.draw(starImg, v[1] - (starImg:getWidth() / 2) - camX, v[2] - (starImg:getHeight() / 2) - camY)
+			love.graphics.draw(starImg, v[1] - (starImg:getWidth() / 2), v[2] - (starImg:getHeight() / 2))
 		elseif starStyle == "circle" then
-			love.graphics.circle("fill", v[1] - camX, v[2] - camY, circleSize)
+			love.graphics.circle("fill", v[1], v[2], circleSize)
 		elseif starStyle == "point" then
-			love.graphics.points(v[1] - camX, v[2] - camY)
+			love.graphics.points(v[1], v[2])
 		end
 		if showVelocity then
-			love.graphics.line(v[1] - camX, v[2] - camY, (v[1] - camX) + (v[3] * shownVelMul), (v[2] - camY) + (v[4] * shownVelMul))
+			love.graphics.line(v[1], v[2], v[1] + (v[3] * shownVelMul), v[2] + (v[4] * shownVelMul))
 		end
 		if showAcceleration then
 			if starsV[k] then
 				if starsV[k][3] and starsV[k][4] then
-					love.graphics.line(v[1] - camX, v[2] - camY, (v[1] - camX) - (starsV[k][3] * shownAccMul), (v[2] - camY) - (starsV[k][4] * shownAccMul))
+					love.graphics.line(v[1], v[2], v[1] - (starsV[k][3] * shownAccMul), v[2] - (starsV[k][4] * shownAccMul))
 				end
 			end
 		end
 	end
 	if wall then
 		love.graphics.setColor({255, 255, 255})
-		love.graphics.rectangle("line", -camX, -camY, love.graphics.getWidth(), love.graphics.getHeight())
+		love.graphics.rectangle("line", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
 	end
 	if starInfo ~= nil then
 		if stars[starInfo] ~= nil then
@@ -284,6 +281,10 @@ function love.draw()
 			love.graphics.print(starInfoText, stars[starInfo][1] - camX + starInfoCircle, stars[starInfo][2] - camY + starInfoCircle)
 		end
 	end
+	love.graphics.pop()
+end
+
+function drawUI()
 	if info then
 		local text = #stars .. " stars\n"
 		text = text .. love.timer.getFPS() .. " FPS\n"
@@ -335,6 +336,22 @@ function love.draw()
 		love.graphics.setColor({255, 255, 255})
 		love.graphics.print(text, 5, 5)
 	end
+end
+
+function love.draw()
+	local gameCanvas = love.graphics.newCanvas()
+	local UICanvas = love.graphics.newCanvas()
+	love.graphics.setCanvas(gameCanvas)
+	drawUniverse(camX, camY)
+	love.graphics.setCanvas(UICanvas)
+	if love.mouse.isDown(2) then
+		love.graphics.setColor({255, 255, 255})
+		love.graphics.circle("line", love.mouse.getX(), love.mouse.getY(), eraseBrushSize)
+	end
+	drawUI()
+	love.graphics.setCanvas()
+	love.graphics.draw(gameCanvas)
+	love.graphics.draw(UICanvas)
 end
 
 function love.keypressed(key, scancode, isrepeat)
