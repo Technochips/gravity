@@ -243,21 +243,24 @@ function drawUniverse(x, y)
 	love.graphics.push()
 	love.graphics.translate(-x,-y)
 	for k, v in pairs(stars) do
-		if starColor then love.graphics.setColor(v[6]) else love.graphics.setColor({255, 255, 255}) end
-		if starStyle == "image" then
-			love.graphics.draw(starImg, v[1] - (starImg:getWidth() / 2), v[2] - (starImg:getHeight() / 2))
-		elseif starStyle == "circle" then
-			love.graphics.circle("fill", v[1], v[2], circleSize)
-		elseif starStyle == "point" then
-			love.graphics.points(v[1], v[2])
-		end
-		if showVelocity then
-			love.graphics.line(v[1], v[2], v[1] + (v[3] * shownVelMul), v[2] + (v[4] * shownVelMul))
-		end
-		if showAcceleration then
-			if starsV[k] then
-				if starsV[k][3] and starsV[k][4] then
-					love.graphics.line(v[1], v[2], v[1] - (starsV[k][3] * shownAccMul), v[2] - (starsV[k][4] * shownAccMul))
+		if v[1] > x and v[1] < love.graphics.getWidth() + x
+		and v[2] > y and v[2] < love.graphics.getHeight() + y then
+			if starColor then love.graphics.setColor(v[6]) else love.graphics.setColor({255, 255, 255}) end
+			if starStyle == "image" then
+				love.graphics.draw(starImg, v[1] - (starImg:getWidth() / 2), v[2] - (starImg:getHeight() / 2))
+			elseif starStyle == "circle" then
+				love.graphics.circle("fill", v[1], v[2], circleSize)
+			elseif starStyle == "point" then
+				love.graphics.points(v[1], v[2])
+			end
+			if showVelocity then
+				love.graphics.line(v[1], v[2], v[1] + (v[3] * shownVelMul), v[2] + (v[4] * shownVelMul))
+			end
+			if showAcceleration then
+				if starsV[k] then
+					if starsV[k][3] and starsV[k][4] then
+						love.graphics.line(v[1], v[2], v[1] - (starsV[k][3] * shownAccMul), v[2] - (starsV[k][4] * shownAccMul))
+					end
 				end
 			end
 		end
