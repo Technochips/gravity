@@ -17,7 +17,9 @@ function love.load(args)
 	
 	camX = 0
 	camY = 0
-	camspeed = 50
+	camspeed = 64
+
+	zoom = 1
 	
 	argt = {}
 	
@@ -28,7 +30,7 @@ function love.load(args)
 			pause = true
 		end
 		if args[i] == "-l" and (not argt["-l"]) then	
-			argt["-t"] = true
+			argt["-l"] = true
 			loadUniverse(args[i + 1])
 			i = i + 1
 		end
@@ -46,7 +48,7 @@ function love.load(args)
 	showAcceleration = false
 	shownAccMul = 32
 	
-	scrollspeed = 10
+	scrollspeed = 2
 	
 	focus = nil
 	starInfo = nil
@@ -55,12 +57,14 @@ function love.load(args)
 	
 	GM = 1
 	GMscrollspeed = 2
+
+	zoomspeed = 2
 end
 
 function love.update(dt)
 	if love.mouse.isDown(2) then
 		for k, v in pairs(stars) do
-			local r = math.sqrt((v[1] - (love.mouse.getX() + camX))^2 + (v[2] - (love.mouse.getY() + camY))^2)
+			local r = math.sqrt((v[1] - ((love.mouse.getX() / zoom) + camX))^2 + (v[2] - ((love.mouse.getY() / zoom) + camY))^2) * zoom
 			
 			if r <= eraseBrushSize then
 				table.remove(stars, k)
@@ -69,21 +73,21 @@ function love.update(dt)
 	end
 	if focus == nil then
 		if love.keyboard.isScancodeDown("right") then
-			camX = camX + camspeed
+			camX = camX + camspeed / zoom
 		end
 		if love.keyboard.isScancodeDown("down") then
-			camY = camY + camspeed
+			camY = camY + camspeed / zoom
 		end
 		if love.keyboard.isScancodeDown("left") then
-			camX = camX - camspeed
+			camX = camX - camspeed / zoom
 		end
 		if love.keyboard.isScancodeDown("up") then
-			camY = camY - camspeed
+			camY = camY - camspeed / zoom
 		end
 	else
 		if stars[focus] ~= nil then
-			camX = stars[focus][1] - (love.graphics.getWidth() / 2)
-			camY = stars[focus][2] - (love.graphics.getHeight() / 2)
+			camY = stars[focus][2] - ((love.graphics.getHeight() / zoom) / 2)
+			camX = stars[focus][1] - ((love.graphics.getWidth() / zoom) / 2)
 		end
 	end
 	if not pause then
@@ -239,12 +243,13 @@ function saveUniverse()
 	end
 end
 
-function drawUniverse(x, y)
+function drawUniverse(x, y, sx, sy)
 	love.graphics.push()
+	love.graphics.scale(sx,sy)
 	love.graphics.translate(-x,-y)
 	for k, v in pairs(stars) do
-		if v[1] > x and v[1] < love.graphics.getWidth() + x
-		and v[2] > y and v[2] < love.graphics.getHeight() + y then
+		if v[1] > x and v[1] < (love.graphics.getWidth() / zoom) + x
+		and v[2] > y and v[2] < (love.graphics.getHeight() / zoom) + y then
 			if starColor then love.graphics.setColor(v[6]) else love.graphics.setColor({255, 255, 255}) end
 			if starStyle == "image" then
 				love.graphics.draw(starImg, v[1] - (starImg:getWidth() / 2), v[2] - (starImg:getHeight() / 2))
@@ -269,25 +274,28 @@ function drawUniverse(x, y)
 		love.graphics.setColor({255, 255, 255})
 		love.graphics.rectangle("line", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
 	end
-	if starInfo ~= nil then
-		if stars[starInfo] ~= nil then
-			local starInfoText = ""
-			starInfoText = starInfoText .. "X: " .. stars[starInfo][1] .. "\n"
-			starInfoText = starInfoText .. "Y: " .. stars[starInfo][2] .. "\n"
-			--starInfoText = starInfoText .. "Horizontal velocity: " .. stars[starInfo][3] .. "\n"
-			--starInfoText = starInfoText .. "Vertical velocity: " .. stars[starInfo][4] .. "\n"
-			starInfoText = starInfoText .. "Mass: " .. stars[starInfo][5] .. "\n"
-			if stars[starInfo][7] then tarInfoText = starInfoText .. "Unaccelerable\n" end
-			
-			love.graphics.setColor(255, 255, 255)
-			love.graphics.circle("line", stars[starInfo][1] - camX, stars[starInfo][2] - camY, starInfoCircle)
-			love.graphics.print(starInfoText, stars[starInfo][1] - camX + starInfoCircle, stars[starInfo][2] - camY + starInfoCircle)
-		end
-	end
 	love.graphics.pop()
 end
 
 function drawUI()
+	if starInfo ~= nil then
+		if stars[starInfo] ~= nil then
+			if stars[starInfo][1] > camX and stars[starInfo][1] < (love.graphics.getWidth() / zoom) + camX
+			and stars[starInfo][2] > camY and stars[starInfo][2] < (love.graphics.getHeight() / zoom) + camY then
+				local starInfoText = ""
+				starInfoText = starInfoText .. "X: " .. stars[starInfo][1] .. "\n"
+				starInfoText = starInfoText .. "Y: " .. stars[starInfo][2] .. "\n"
+				--starInfoText = starInfoText .. "Horizontal velocity: " .. stars[starInfo][3] .. "\n"
+				--starInfoText = starInfoText .. "Vertical velocity: " .. stars[starInfo][4] .. "\n"
+				starInfoText = starInfoText .. "Mass: " .. stars[starInfo][5] .. "\n"
+				if stars[starInfo][7] then tarInfoText = starInfoText .. "Unaccelerable\n" end
+				
+				love.graphics.setColor(255, 255, 255)
+				love.graphics.circle("line", (stars[starInfo][1] - camX) * zoom, (stars[starInfo][2] - camY) * zoom, starInfoCircle)
+				love.graphics.print(starInfoText, ((stars[starInfo][1] - camX) * zoom) + starInfoCircle, ((stars[starInfo][2] - camY) * zoom) + starInfoCircle)
+			end
+		end
+	end
 	if info then
 		local text = #stars .. " stars\n"
 		text = text .. love.timer.getFPS() .. " FPS\n"
@@ -296,8 +304,6 @@ function drawUI()
 		else
 			text = text .. "Running\n"
 		end
-		
-		
 		if wall then
 			text = text .. "Wall\n"
 			if wallMode == "wormhole" then
@@ -336,25 +342,26 @@ function drawUI()
 		
 		text = text .. "Camera speed: " .. camspeed .. "\n"
 		text = text .. "Gravity multiplier: " .. GM .. "\n"
+		text = text .. "Zoom: " .. zoom .. "\n"
 		love.graphics.setColor({255, 255, 255})
 		love.graphics.print(text, 5, 5)
 	end
 end
 
 function love.draw()
-	local gameCanvas = love.graphics.newCanvas()
-	local UICanvas = love.graphics.newCanvas()
-	love.graphics.setCanvas(gameCanvas)
-	drawUniverse(camX, camY)
-	love.graphics.setCanvas(UICanvas)
+	--gameCanvas = love.graphics.newCanvas()
+	--UICanvas = love.graphics.newCanvas()
+	--love.graphics.setCanvas(gameCanvas)
+	drawUniverse(camX, camY, zoom, zoom)
+	--love.graphics.setCanvas(UICanvas)
 	if love.mouse.isDown(2) then
 		love.graphics.setColor({255, 255, 255})
 		love.graphics.circle("line", love.mouse.getX(), love.mouse.getY(), eraseBrushSize)
 	end
 	drawUI()
-	love.graphics.setCanvas()
-	love.graphics.draw(gameCanvas)
-	love.graphics.draw(UICanvas)
+	--love.graphics.setCanvas()
+	--love.graphics.draw(gameCanvas)
+	--love.graphics.draw(UICanvas)
 end
 
 function love.keypressed(key, scancode, isrepeat)
@@ -366,12 +373,14 @@ function love.keypressed(key, scancode, isrepeat)
 		camX = 0
 		camY = 0
 		pause = true
+		zoom = 1
 		generate()
 	elseif key == "n" then
 		camX = 0
 		camY = 0
 		starInfo = nil
 		focus = nil
+		zoom = 1
 		stars = {}
 	elseif key == "i" then
 		info = not info
@@ -395,13 +404,17 @@ function love.keypressed(key, scancode, isrepeat)
 		GM = GM * GMscrollspeed
 	elseif key == "pagedown" then
 		GM = GM / GMscrollspeed
+	elseif key == "home" then
+		zoom = zoom * zoomspeed
+	elseif key == "end" then
+		zoom = zoom / zoomspeed
 	end
 end
 
 function love.mousepressed(x, y, button, isTouch)
 	if button == 1 then
 		--table.insert(stars, {x + camX, y + camY, 0, 0, 1, {love.math.random(224, 255), love.math.random(224, 255), love.math.random(224, 255)}, false})
-		table.insert(stars, {x + camX, y + camY, 0, 0, map_range(love.math.random(), 0, 1, 0.25, 10), {love.math.random(224, 255), love.math.random(224, 255), love.math.random(224, 255)}, false})
+		table.insert(stars, {(x / zoom) + camX, (y / zoom) + camY, 0, 0, map_range(love.math.random(), 0, 1, 0.25, 10), {love.math.random(224, 255), love.math.random(224, 255), love.math.random(224, 255)}, false})
 	elseif button == 3 then
 		for k, v in pairs(stars) do
 			v[3] = 0
@@ -411,8 +424,12 @@ function love.mousepressed(x, y, button, isTouch)
 end
 
 function love.wheelmoved(x,y)
-	if camspeed + y * scrollspeed >= 0 then
-		camspeed = camspeed + y * scrollspeed
+	if camspeed / scrollspeed >= 0 then
+		if y > 0 then
+			camspeed = camspeed * scrollspeed
+		elseif y < 0 then
+			camspeed = camspeed / scrollspeed
+		end
 	end
 end
 
