@@ -195,6 +195,7 @@ function loadUniverse(file)
 		else
 			local decoded = JSON:decode(contents)
 			stars = {}
+			local byteColor = true
 			if decoded.properties.pause ~= nil then pause = decoded.properties.pause end
 			if decoded.properties.wall ~= nil then wall = decoded.properties.wall end
 			if decoded.properties.camX ~= nil then camX = decoded.properties.camX end
@@ -205,8 +206,18 @@ function loadUniverse(file)
 			if decoded.properties.showVelocity ~= nil then showVelocity = decoded.properties.showVelocity end
 			if decoded.properties.showAcceleration ~= nil then showAcceleration = decoded.properties.showAcceleration end
 			if decoded.properties.camspeed ~= nil then camspeed = decoded.properties.camspeed end
+			if decoded.properties.byteColor ~= nil then byteColor = decoded.properties.byteColor end
 			
 			stars = decoded.stars
+			print(decoded.properties.byteColor)
+			
+			if byteColor then
+				for i = 1, #stars do
+					stars[i][6][1] = stars[i][6][1] / 255
+					stars[i][6][2] = stars[i][6][2] / 255
+					stars[i][6][3] = stars[i][6][3] / 255
+				end
+			end
 		end
 	end
 end

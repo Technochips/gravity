@@ -10,7 +10,8 @@
 		"starStyle": "image",
 		"showVelocity": false,
 		"showAcceleration": false,
-		"camspeed": 50
+		"camspeed": 50,
+		"byteColor": false
 	},
 	"stars":
 	[
