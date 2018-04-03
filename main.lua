@@ -182,9 +182,11 @@ end
 
 function loadUniverse(file)
 	local contents, e = nil
-	if not love.filesystem.exists(file) then
+	fileinfo = love.filesystem.getInfo(file)
+	if fileinfo == nil or fileinfo.type ~= "file" then--not love.filesystem.exists(file) then
 		file = "saves/" .. file
-		if not love.filesystem.exists(file) then
+		fileinfo = love.filesystem.getInfo(file)
+		if fileinfo == nil or fileinfo.type ~= "file" then
 			e = "File doesn't exists"
 		end
 	end
@@ -209,7 +211,6 @@ function loadUniverse(file)
 			if decoded.properties.byteColor ~= nil then byteColor = decoded.properties.byteColor end
 			
 			stars = decoded.stars
-			print(decoded.properties.byteColor)
 			
 			if byteColor then
 				for i = 1, #stars do
