@@ -13,6 +13,13 @@ function love.load(args)
 	
 	starColor = true
 	
+	version = {love.getVersion()}
+	
+	useByteColor = version[1] < 11
+	
+	colorMaximum = 1
+	if useByteColor then colorMaximum = 255 end
+	
 	--G = 6.674 * 10^-11 * 1^3 * 1^-1 * 1^-2
 	
 	camX = 0
@@ -182,10 +189,23 @@ end
 
 function loadUniverse(file)
 	local contents, e = nil
-	fileinfo = love.filesystem.getInfo(file)
-	if fileinfo == nil or fileinfo.type ~= "file" then--not love.filesystem.exists(file) then
-		file = "saves/" .. file
+	local fileinfo = nil
+	local exists = nil
+	if version[1] >= 11 then
 		fileinfo = love.filesystem.getInfo(file)
+		exists = fileinfo == nil or fileinfo.type ~= "file"
+	else
+		exists = love.filesystem.exists(file) and not love.filesystem.isDirectory(file)
+	end
+	
+	if exists then--not love.filesystem.exists(file) then
+		file = "saves/" .. file
+		if version[1] >= 11 then --oof twice the same code
+			fileinfo = love.filesystem.getInfo(file)
+			exists = fileinfo == nil or fileinfo.type ~= "file"
+		else
+			exists = love.filesystem.exists(file) and not love.filesystem.isDirectory(file)
+		end
 		if fileinfo == nil or fileinfo.type ~= "file" then
 			e = "File doesn't exists"
 		end
@@ -238,12 +258,22 @@ function saveUniverse()
 	decoded.properties.showVelocity = showVelocity
 	decoded.properties.showAcceleration = showAcceleration
 	decoded.properties.camspeed = camspeed
+	decoded.properties.byteColor = false
 	
 	local encoded = JSON:encode(decoded)
 	
 	local filePath = "saves/" .. os.time()
 	
-	if not love.filesystem.isDirectory("saves") then
+	local fileinfo = nil
+	local exists = nil
+	if version[1] >= 11 then
+		fileinfo = love.filesystem.getInfo("saves")
+		exists = fileinfo ~= nil and fileinfo.type ~= "directory"
+	else
+		exists = love.filesystem.isDirectory("saves")
+	end
+	
+	if not exists then
 		love.filesystem.createDirectory("saves")
 	end
 	
@@ -262,7 +292,7 @@ function drawUniverse(x, y, sx, sy)
 	for k, v in pairs(stars) do
 		if v[1] > x and v[1] < (love.graphics.getWidth() / zoom) + x
 		and v[2] > y and v[2] < (love.graphics.getHeight() / zoom) + y then
-			if starColor then love.graphics.setColor(v[6]) else love.graphics.setColor({1, 1, 1}) end
+			if starColor then love.graphics.setColor({v[6][1] * colorMaximum, v[6][2] * colorMaximum, v[6][3] * colorMaximum}) else love.graphics.setColor({1 * colorMaximum, 1 * colorMaximum, 1 * colorMaximum}) end
 			if starStyle == "image" then
 				love.graphics.draw(starImg, v[1] - (starImg:getWidth() / 2), v[2] - (starImg:getHeight() / 2))
 			elseif starStyle == "circle" then
@@ -283,7 +313,7 @@ function drawUniverse(x, y, sx, sy)
 		end
 	end
 	if wall then
-		love.graphics.setColor({1, 1, 1})
+		love.graphics.setColor({1 * colorMaximum, 1 * colorMaximum, 1 * colorMaximum})
 		love.graphics.rectangle("line", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
 	end
 	love.graphics.pop()
@@ -302,7 +332,7 @@ function drawUI()
 				starInfoText = starInfoText .. "Mass: " .. stars[starInfo][5] .. "\n"
 				if stars[starInfo][7] then tarInfoText = starInfoText .. "Unaccelerable\n" end
 				
-				love.graphics.setColor(1, 1, 1)
+				love.graphics.setColor(1 * colorMaximum, 1 * colorMaximum, 1 * colorMaximum)
 				love.graphics.circle("line", (stars[starInfo][1] - camX) * zoom, (stars[starInfo][2] - camY) * zoom, starInfoCircle)
 				love.graphics.print(starInfoText, ((stars[starInfo][1] - camX) * zoom) + starInfoCircle, ((stars[starInfo][2] - camY) * zoom) + starInfoCircle)
 			end
@@ -355,7 +385,7 @@ function drawUI()
 		text = text .. "Camera speed: " .. camspeed .. "\n"
 		text = text .. "Gravity multiplier: " .. GM .. "\n"
 		text = text .. "Zoom: " .. zoom .. "\n"
-		love.graphics.setColor({1, 1, 1})
+		love.graphics.setColor({1 * colorMaximum, 1 * colorMaximum, 1 * colorMaximum})
 		love.graphics.print(text, 5, 5)
 	end
 end
@@ -367,7 +397,7 @@ function love.draw()
 	drawUniverse(camX, camY, zoom, zoom)
 	--love.graphics.setCanvas(UICanvas)
 	if love.mouse.isDown(2) then
-		love.graphics.setColor({1, 1, 1})
+		love.graphics.setColor({1 * colorMaximum, 1 * colorMaximum, 1 * colorMaximum})
 		love.graphics.circle("line", love.mouse.getX(), love.mouse.getY(), eraseBrushSize)
 	end
 	drawUI()
