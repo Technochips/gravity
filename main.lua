@@ -41,7 +41,7 @@ function love.load(args)
 	
 	starStyle = "image"
 	
-	wallMode = "wormhole"
+	wallMode = "stop"
 	
 	showVelocity = false
 	shownVelMul = 8
@@ -170,7 +170,7 @@ function generate()
 			local r = love.math.random()
 			
 			if r < n then
-				table.insert(stars, {x, y, 0, 0, map_range(love.math.random(), 0, 1, 0.25, 10), {love.math.random(224, 255), love.math.random(224, 255), love.math.random(224, 255)}, false})
+				generateStar(x, y)
 			end
 			
 				y = y + 5
@@ -250,7 +250,7 @@ function drawUniverse(x, y, sx, sy)
 	for k, v in pairs(stars) do
 		if v[1] > x and v[1] < (love.graphics.getWidth() / zoom) + x
 		and v[2] > y and v[2] < (love.graphics.getHeight() / zoom) + y then
-			if starColor then love.graphics.setColor(v[6]) else love.graphics.setColor({255, 255, 255}) end
+			if starColor then love.graphics.setColor(v[6]) else love.graphics.setColor({1, 1, 1}) end
 			if starStyle == "image" then
 				love.graphics.draw(starImg, v[1] - (starImg:getWidth() / 2), v[2] - (starImg:getHeight() / 2))
 			elseif starStyle == "circle" then
@@ -271,7 +271,7 @@ function drawUniverse(x, y, sx, sy)
 		end
 	end
 	if wall then
-		love.graphics.setColor({255, 255, 255})
+		love.graphics.setColor({1, 1, 1})
 		love.graphics.rectangle("line", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
 	end
 	love.graphics.pop()
@@ -290,7 +290,7 @@ function drawUI()
 				starInfoText = starInfoText .. "Mass: " .. stars[starInfo][5] .. "\n"
 				if stars[starInfo][7] then tarInfoText = starInfoText .. "Unaccelerable\n" end
 				
-				love.graphics.setColor(255, 255, 255)
+				love.graphics.setColor(1, 1, 1)
 				love.graphics.circle("line", (stars[starInfo][1] - camX) * zoom, (stars[starInfo][2] - camY) * zoom, starInfoCircle)
 				love.graphics.print(starInfoText, ((stars[starInfo][1] - camX) * zoom) + starInfoCircle, ((stars[starInfo][2] - camY) * zoom) + starInfoCircle)
 			end
@@ -343,7 +343,7 @@ function drawUI()
 		text = text .. "Camera speed: " .. camspeed .. "\n"
 		text = text .. "Gravity multiplier: " .. GM .. "\n"
 		text = text .. "Zoom: " .. zoom .. "\n"
-		love.graphics.setColor({255, 255, 255})
+		love.graphics.setColor({1, 1, 1})
 		love.graphics.print(text, 5, 5)
 	end
 end
@@ -355,7 +355,7 @@ function love.draw()
 	drawUniverse(camX, camY, zoom, zoom)
 	--love.graphics.setCanvas(UICanvas)
 	if love.mouse.isDown(2) then
-		love.graphics.setColor({255, 255, 255})
+		love.graphics.setColor({1, 1, 1})
 		love.graphics.circle("line", love.mouse.getX(), love.mouse.getY(), eraseBrushSize)
 	end
 	drawUI()
@@ -414,7 +414,7 @@ end
 function love.mousepressed(x, y, button, isTouch)
 	if button == 1 then
 		--table.insert(stars, {x + camX, y + camY, 0, 0, 1, {love.math.random(224, 255), love.math.random(224, 255), love.math.random(224, 255)}, false})
-		table.insert(stars, {(x / zoom) + camX, (y / zoom) + camY, 0, 0, map_range(love.math.random(), 0, 1, 0.25, 10), {love.math.random(224, 255), love.math.random(224, 255), love.math.random(224, 255)}, false})
+		generateStar((x / zoom) + camX, (y / zoom) + camY)
 	elseif button == 3 then
 		for k, v in pairs(stars) do
 			v[3] = 0
@@ -435,4 +435,11 @@ end
 
 function map_range(value, low1, high1, low2, high2)
 	return low2 + (high2 - low2) * (value - low1) / (high1 - low1)
+end
+
+function addStar(x, y, velX, velY, mass, color, unaccelerable)
+	table.insert(stars, {x, y, velX, velY, mass, color, unaccelerable})
+end
+function generateStar(x, y)
+	addStar(x, y, 0, 0, map_range(love.math.random(), 0, 1, 0.25, 10), {map_range(love.math.random(), 0, 1, 224/255, 1), map_range(love.math.random(), 0, 1, 224/255, 1), map_range(love.math.random(), 0, 1, 224/255, 1)}, false)
 end
